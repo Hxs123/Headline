@@ -29,37 +29,52 @@ var articleUrl = '';
 var params = '?url=' + articleUrl + '&sentences=' + SENTENCES;
 var requestUrl = API_URL + params;
 var showArticle = false;
+var SAMPLE_ARTICLES = ['http://www.independent.co.uk/arts-entertainment/books/reviews/sweet-home-by-carys-bray-book-review-unnerving-tour-de-force-shows-what-the-short-story-can-do-a6891786.html', 'http://www.technewsworld.com/story/New-Stagefright-Exploit-Takes-a-Bow-83270.html'];
 
 var InputField = React.createClass({
   getInitialState: function() {
     return {
+      visible: true,
       text: "",
       test: ""  
     };
   },
 
   render: function () {
-    return (
-      <View style={styles.inputField}>
-        <Text style={styles.prompt}>
-          Enter a URL to summarize an article:
-        </Text>
-        <TextInput 
-          style={styles.textInput}
-          onChangeText={(text) => this.setState({text})}
-          onSubmitEditing={this.onPressButton}
-          //value={this.state.text}
-        />
-        <TouchableHighlight onPress={this.onPressButton}>
-            <View style={styles.button}>
-              <Text style={styles.text}>Submit</Text>
-            </View>
-          </TouchableHighlight>
-          {/* This line down here is for debugging purposes */}
-          <Text>{this.state.text}</Text>
-          <Text>{this.state.test}</Text>
-      </View>
-    );
+    if (showArticle == false) {
+      return (
+        <View style={styles.inputField}>
+          <Text style={styles.prompt}>
+            Enter a URL to summarize an article:
+          </Text>
+          <TextInput 
+            style={styles.textInput}
+            onChangeText={(text) => this.setState({text})}
+            onSubmitEditing={this.onPressButton}
+            //value={this.state.text}
+          />
+          <TouchableHighlight onPress={this.onPressButton}>
+              <View style={styles.button}>
+                <Text style={styles.text}>Submit</Text>
+              </View>
+            </TouchableHighlight>
+            {/* This line down here is for debugging purposes */}
+            <Text>{this.state.text}</Text>
+            <Text>{this.state.test}</Text>
+        </View>
+      );
+    }
+    else {
+      return (
+        <View style={styles.inputField}>
+          <TouchableHighlight onPress={this.onPressBack}>
+              <View style={styles.button}>
+                <Text style={styles.text}>Back</Text>
+              </View>
+            </TouchableHighlight>
+        </View>
+      );
+    }
   },
 
   onPressButton: function() {
@@ -68,6 +83,11 @@ var InputField = React.createClass({
     //Do something that will send a request to the server
     this.refreshParams();
     //this.replaceAllSlashes();
+  },
+
+  onPressBack: function() {
+    showArticle = false;
+    this.setState({visible: true});
   },
 
   refreshParams: function() {
@@ -113,10 +133,15 @@ var SampleArticles = React.createClass({
   render: function () {
     return (
       <ScrollView style={styles.samples}>
-        <TouchableHighlight onPress={() => this.onPressUrl('http://www.independent.co.uk/arts-entertainment/books/reviews/sweet-home-by-carys-bray-book-review-unnerving-tour-de-force-shows-what-the-short-story-can-do-a6891786.html')}>
+        <TouchableHighlight onPress={() => this.onPressUrl(SAMPLE_ARTICLES[0])}>
               <View style={styles.rightContainer}>
                 {/*<Text style={styles.number}>1.</Text>*/}
-                <Text style={styles.hyperlink}>1. www.sweg.com</Text>
+                <Text style={styles.hyperlink}>1. {SAMPLE_ARTICLES[0]}</Text>
+              </View>
+          </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.onPressUrl(SAMPLE_ARTICLES[1])}>
+              <View style={styles.rightContainer}>
+                <Text style={styles.hyperlink}>2. {SAMPLE_ARTICLES[1]}</Text>
               </View>
           </TouchableHighlight>
           <Text>{this.state.articleText}</Text>
@@ -131,6 +156,7 @@ var SampleArticles = React.createClass({
     params = '?url=' + this.state.sampleUrl + '&sentences=' + SENTENCES;
     requestUrl = API_URL + params;
     this.fetchData();
+    showArticle = true;
   }
 
 });
