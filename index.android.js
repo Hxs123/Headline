@@ -19,99 +19,38 @@ import React, {
 
 //var EXAMPLE_ARTICLES = {number : "1.", name : "Yolo", url : "www.sweg.org"};
 //new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-
+var STATE = {
+  MAIN : {value: 0}, 
+  ARTICLE: {value: 1},
+  SUMMARY: {value: 2}
+};
+//var currentState = STATE.MAIN;
+var Dimensions = require('Dimensions');
+var windowSize = Dimensions.get('window');
 
 var API_URL = 'https://api.aylien.com/api/v1/summarize';
 var API_ID = '7358622d';
 var API_KEY = 'ef58a20105cbd03d9931df2142752a86';
 var SENTENCES = 5;
-var articleUrl = '';
-var params = '?url=' + articleUrl + '&sentences=' + SENTENCES;
-var requestUrl = API_URL + params;
-var showArticle = false;
-var SAMPLE_ARTICLES = ['http://www.independent.co.uk/arts-entertainment/books/reviews/sweet-home-by-carys-bray-book-review-unnerving-tour-de-force-shows-what-the-short-story-can-do-a6891786.html', 'http://www.technewsworld.com/story/New-Stagefright-Exploit-Takes-a-Bow-83270.html'];
+//var articleUrl = '';
+var params = '';//'?url=' + articleUrl + '&sentences=' + SENTENCES;
+var requestUrl = '';//API_URL + params;
+var showArticle = true;
+var SAMPLE_ARTICLES = ['http://www.independent.co.uk/arts-entertainment/books/reviews/sweet-home-by-carys-bray-book-review-unnerving-tour-de-force-shows-what-the-short-story-can-do-a6891786.html', 'http://www.technewsworld.com/story/New-Stagefright-Exploit-Takes-a-Bow-83270.html', 'http://www.reuters.com/article/us-microsoft-twitter-bot-idUSKCN0WQ2LA'];
 
 var InputField = React.createClass({
   getInitialState: function() {
     return {
-      visible: true,
-      text: "",
-      test: ""  
-    };
-  },
-
-  render: function () {
-    if (showArticle == false) {
-      return (
-        <View style={styles.inputField}>
-          <Text style={styles.prompt}>
-            Enter a URL to summarize an article:
-          </Text>
-          <TextInput 
-            style={styles.textInput}
-            onChangeText={(text) => this.setState({text})}
-            onSubmitEditing={this.onPressButton}
-            //value={this.state.text}
-          />
-          <TouchableHighlight onPress={this.onPressButton}>
-              <View style={styles.button}>
-                <Text style={styles.text}>Submit</Text>
-              </View>
-            </TouchableHighlight>
-            {/* This line down here is for debugging purposes */}
-            <Text>{this.state.text}</Text>
-            <Text>{this.state.test}</Text>
-        </View>
-      );
-    }
-    else {
-      return (
-        <View style={styles.inputField}>
-          <TouchableHighlight onPress={this.onPressBack}>
-              <View style={styles.button}>
-                <Text style={styles.text}>Back</Text>
-              </View>
-            </TouchableHighlight>
-        </View>
-      );
-    }
-  },
-
-  onPressButton: function() {
-    articleUrl = this.state.text;
-    this.setState({test : requestUrl});
-    //Do something that will send a request to the server
-    this.refreshParams();
-    //this.replaceAllSlashes();
-  },
-
-  onPressBack: function() {
-    showArticle = false;
-    this.setState({visible: true});
-  },
-
-  refreshParams: function() {
-    params = '?url=' + articleUrl + '&sentences=' + SENTENCES;
-    requestUrl = API_URL + params;
-  }
-
-/*   replaceAllSlashes: function() {
-    var str = this.state.text;
-    str.replace(new RegExp('//', 'g'), '%2F');
-    str.replace(new RegExp(':', 'g', '%3A'));
-    this.setState({text : str});
-  } */
-});
-
-var SampleArticles = React.createClass({
-  getInitialState: function() {
-    return {
+      myState: STATE.MAIN,
+      articleUrl: "",
+      test: "",
       sampleUrl: "",
       articleText: "",
-      summary: ""
+      summary: "",
+      loaded: false
     };
   },
-  
+
   fetchData() {
     fetch(requestUrl, {
       method: 'GET',
@@ -124,31 +63,109 @@ var SampleArticles = React.createClass({
       .then((responseData) => {
         this.setState({
           articleText: responseData.text,
-          summary: responseData.sentences
+          summary: responseData.sentences,
+          loaded: true
         });
       })
       .done();
   },
 
   render: function () {
-    return (
-      <ScrollView style={styles.samples}>
-        <TouchableHighlight onPress={() => this.onPressUrl(SAMPLE_ARTICLES[0])}>
-              <View style={styles.rightContainer}>
-                {/*<Text style={styles.number}>1.</Text>*/}
-                <Text style={styles.hyperlink}>1. {SAMPLE_ARTICLES[0]}</Text>
-              </View>
+    if (this.state.myState == STATE.MAIN) {
+      return (
+        <View style={styles.inputField}>
+          <Text style={styles.headline}>HEADLINE</Text>
+          <Text style={styles.prompt}>
+            Enter a URL to summarize an article:
+          </Text>
+          <TextInput 
+            style={styles.textInput}
+            onChangeText={(articleUrl) => this.setState({articleUrl})}
+            onSubmitEditing={this.onPressButton}
+            //value={this.state.text}
+          />
+          <TouchableHighlight style={styles.button} 
+                              onPress={this.onPressButton}>
+              <Text style={styles.text}>Submit</Text>
           </TouchableHighlight>
-        <TouchableHighlight onPress={() => this.onPressUrl(SAMPLE_ARTICLES[1])}>
-              <View style={styles.rightContainer}>
-                <Text style={styles.hyperlink}>2. {SAMPLE_ARTICLES[1]}</Text>
-              </View>
+          {/* This line down here is for debugging purposes */}
+          <Text>{this.state.articleUrl}</Text>
+          <Text>{this.state.test}</Text>
+          <Text style={styles.or}>OR</Text>
+          <Text style={styles.prompt}>Try out a sample article</Text>
+          <TouchableHighlight style={styles.hyperlinkWrap}
+                              onPress={() => this.onPressUrl(SAMPLE_ARTICLES[0])}>
+              <Text style={styles.hyperlink}>1. {SAMPLE_ARTICLES[0]}</Text>
           </TouchableHighlight>
-          <Text>{this.state.articleText}</Text>
-          <Text>-------------------------</Text>
-          <Text>{this.state.summary}</Text>
-      </ScrollView>
-    );
+          <TouchableHighlight style={styles.hyperlinkWrap}
+                              onPress={() => this.onPressUrl(SAMPLE_ARTICLES[1])}>
+              <Text style={styles.hyperlink}>2. {SAMPLE_ARTICLES[1]}</Text>
+          </TouchableHighlight>
+          <TouchableHighlight style={styles.hyperlinkWrap}
+                              onPress={() => this.onPressUrl(SAMPLE_ARTICLES[2])}>
+              <Text style={styles.hyperlink}>3. {SAMPLE_ARTICLES[2]}</Text>
+          </TouchableHighlight>
+        </View>
+      );
+    }
+    else if (this.state.myState == STATE.ARTICLE && this.state.loaded) {
+      return (
+        <ScrollView style={styles.scrollView}>
+          <TouchableHighlight style={styles.button}
+                              onPress={this.onPressBack}>
+            <Text style={styles.text}>Back</Text>
+          </TouchableHighlight>
+          <TouchableHighlight style={styles.button}
+                              onPress={this.onPressSummary}>
+            <Text style={styles.text}>Summary</Text>
+          </TouchableHighlight>
+          <Text style={styles.prompt}>Article</Text>
+          <View style={styles.paddingView}>
+            <Text style={styles.readingText}>{this.state.articleText}</Text>
+          </View>
+        </ScrollView>
+      );
+    }
+    else if (this.state.myState == STATE.SUMMARY) {
+      return (
+        <ScrollView style={styles.scrollView}>
+          <TouchableHighlight style={styles.button}
+                              onPress={this.onPressArticle}>
+              <Text style={styles.text}>Article</Text>
+          </TouchableHighlight>
+          <Text style={styles.prompt}>Summary</Text>
+          <View style={styles.paddingView}>
+            <Text style={styles.readingText}>{this.state.summary}</Text>
+          </View>
+        </ScrollView>
+      );
+    }
+    else if (!this.state.loaded) {
+      return this.renderLoadingView();
+    }
+  },
+
+  onPressArticle: function() {
+    this.setState({myState: STATE.ARTICLE});
+  },
+
+  onPressButton: function() {
+    //articleUrl = this.state.text;
+    //this.setState({test : requestUrl});
+    this.validateUrl();
+    this.refreshParams();
+    this.fetchData(); 
+    this.setState({myState: STATE.ARTICLE});
+  },
+
+  onPressBack: function() {
+    this.setState({myState: STATE.MAIN,
+                   loaded: false
+    });
+  },
+
+  onPressSummary: function() {
+    this.setState({myState: STATE.SUMMARY});
   },
 
   onPressUrl: function(url){
@@ -156,29 +173,60 @@ var SampleArticles = React.createClass({
     params = '?url=' + this.state.sampleUrl + '&sentences=' + SENTENCES;
     requestUrl = API_URL + params;
     this.fetchData();
-    showArticle = true;
-  }
+    this.setState({myState: STATE.ARTICLE});
+  },
 
+  refreshParams: function() {
+    params = '?url=' + this.state.articleUrl + '&sentences=' + SENTENCES;
+    requestUrl = API_URL + params;
+  },
+
+  renderLoadingView: function() {
+    return(
+      <View style={styles.backgroundContainer}>
+        <Text style={styles.prompt}>
+          Loading article & summary...
+        </Text>
+      </View>
+      );
+  },
+
+  validateUrl: function(){
+    if (this.state.articleUrl.indexOf('http') != 0) {
+      var newUrl = 'http://' + this.state.articleUrl;
+      this.setState({articleUrl: newUrl});
+    }
+  }
 });
 
 var ArticleView = React.createClass
 class Headline extends Component {
   render() {
     return (
-      <View style={styles.container}>
+      <View style={styles.backgroundContainer}>
         <InputField />
-        <Text style={styles.or}>OR</Text>
-        <Text style={styles.prompt}>Try out a sample article</Text>
-        <SampleArticles />
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  backgroundContainer: {
+    flexDirection: 'column',
+    flex: 1,
+    backgroundColor: '#000066',
+    opacity: 0.88,
+    margin: 0,
+  },
   button: {
-    backgroundColor: '#00802b',
-
+    backgroundColor: '#000000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    width: windowSize.width,
+    marginTop: 10,
+    padding: 5,
+    opacity: 0.9
   },
   container: {
     flex: 1,
@@ -186,8 +234,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5FCFF',
 
   },
+  headline: {
+    fontStyle: 'italic',
+    textAlign: 'center',
+    fontSize: 40,
+    color: '#00FF00',
+  },
   hyperlink: {
-
+    color: '#FF6600',
+    // Only available for ios, darn
+    textDecorationLine: 'underline',
+    paddingTop: 20,
+  },
+  hyperlinkWrap: {
+    padding: 5
   },
   inputField: {
      paddingTop: 20
@@ -196,24 +256,32 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
+    color: '#00FF00',
   },
-  number: {
-    
+  paddingView: {
+    padding: 10,
+  },
+  readingText: {
+    textAlign: 'left',
+    color: '#FF6600',
   },
   or: {
     textAlign: 'center',
     fontSize: 40,
+    color: '#00FF00',
   },
-  rightContainer: {
-    flex: 1
+  scrollView: {
+    paddingBottom: 10,
   },
   text: {
     textAlign: 'center',
+    color: '#00FF00',
   },
   textInput: {
     height: 40, 
     borderColor: 'gray', 
-    borderWidth: 1
+    borderWidth: 10,
+    color: '#FF6600',
   }
 });
 
