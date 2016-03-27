@@ -30,13 +30,22 @@ Make sure to run this before runnning the app
 	npm install
 
 To run on a virtual device, start the device
+
 	android avd	
-and then type,
-	cd (wherever you saved this repo i.e. react-native/Headline)
+
+and then type
+
+	cd Headline/
 	react-native start
+
+Answer No to any prompts from this next command
+
+	react-native android
 	react-native run-android
 
-See [Running on Device](https://facebook.github.io/react-native/docs/running-on-device-android.html) for physical android devices.
+And you should have a running Headline app on your device
+
+Check out [Running on Device](https://facebook.github.io/react-native/docs/running-on-device-android.html) for running on physical android devices.
 
 # Functionality
 
