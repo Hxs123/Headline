@@ -9,6 +9,7 @@
 import React, {
   AppRegistry,
   Component,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -35,20 +36,44 @@ var SENTENCES = 5;
 //var articleUrl = '';
 var params = '';//'?url=' + articleUrl + '&sentences=' + SENTENCES;
 var requestUrl = '';//API_URL + params;
+var requestArticleUrl ='';
 var showArticle = true;
-var SAMPLE_ARTICLES = ['http://www.independent.co.uk/arts-entertainment/books/reviews/sweet-home-by-carys-bray-book-review-unnerving-tour-de-force-shows-what-the-short-story-can-do-a6891786.html', 'http://www.technewsworld.com/story/New-Stagefright-Exploit-Takes-a-Bow-83270.html', 'http://www.reuters.com/article/us-microsoft-twitter-bot-idUSKCN0WQ2LA'];
+var SAMPLE_ARTICLES = ['http://www.independent.co.uk/arts-entertainment/books/reviews/sweet-home-by-carys-bray-book-review-unnerving-tour-de-force-shows-what-the-short-story-can-do-a6891786.html', 'http://www.theverge.com/2016/3/26/11309624/microsoft-hololens-holoportation-star-wars', 'http://www.reuters.com/article/us-microsoft-twitter-bot-idUSKCN0WQ2LA'];
 
 var InputField = React.createClass({
   getInitialState: function() {
     return {
       myState: STATE.MAIN,
       articleUrl: "",
-      test: "",
       sampleUrl: "",
       articleText: "",
       summary: "",
-      loaded: false
+      loaded: false,
+      title: "",
+      author: "",
+      date: "",
+      image: ""
     };
+  },
+
+  fetchArticle() {
+    fetch(requestArticleUrl, {
+      method: 'GET',
+      headers: {
+        'X-AYLIEN-TextAPI-Application-Key': API_KEY,
+        'X-AYLIEN-TextAPI-Application-ID': API_ID,
+      }
+    })
+      .then((response) => response.json())
+      .then((responseData) => {
+        this.setState({
+          author: responseData.author,
+          image: responseData.image,
+          title: responseData.title,
+          date: responseData.publishDate
+        });
+      })
+      .done();
   },
 
   fetchData() {
@@ -73,7 +98,7 @@ var InputField = React.createClass({
   render: function () {
     if (this.state.myState == STATE.MAIN) {
       return (
-        <View style={styles.inputField}>
+        <ScrollView style={styles.scrollView}>
           <Text style={styles.headline}>HEADLINE</Text>
           <Text style={styles.prompt}>
             Enter a URL to summarize an article:
@@ -82,15 +107,11 @@ var InputField = React.createClass({
             style={styles.textInput}
             onChangeText={(articleUrl) => this.setState({articleUrl})}
             onSubmitEditing={this.onPressButton}
-            //value={this.state.text}
           />
           <TouchableHighlight style={styles.button} 
                               onPress={this.onPressButton}>
               <Text style={styles.text}>Submit</Text>
           </TouchableHighlight>
-          {/* This line down here is for debugging purposes */}
-          <Text>{this.state.articleUrl}</Text>
-          <Text>{this.state.test}</Text>
           <Text style={styles.or}>OR</Text>
           <Text style={styles.prompt}>Try out a sample article</Text>
           <TouchableHighlight style={styles.hyperlinkWrap}
@@ -105,7 +126,7 @@ var InputField = React.createClass({
                               onPress={() => this.onPressUrl(SAMPLE_ARTICLES[2])}>
               <Text style={styles.hyperlink}>3. {SAMPLE_ARTICLES[2]}</Text>
           </TouchableHighlight>
-        </View>
+        </ScrollView>
       );
     }
     else if (this.state.myState == STATE.ARTICLE && this.state.loaded) {
@@ -121,6 +142,9 @@ var InputField = React.createClass({
           </TouchableHighlight>
           <Text style={styles.prompt}>Article</Text>
           <View style={styles.paddingView}>
+            <Text style={styles.info}>Title: {this.state.title}</Text>
+            <Text style={styles.info}>Author: {this.state.author}</Text>
+            <Text style={styles.info}>Date: {this.state.date}</Text>
             <Text style={styles.readingText}>{this.state.articleText}</Text>
           </View>
         </ScrollView>
@@ -150,9 +174,9 @@ var InputField = React.createClass({
   },
 
   onPressButton: function() {
-    //articleUrl = this.state.text;
-    //this.setState({test : requestUrl});
     this.validateUrl();
+    requestArticleUrl = 'https://api.aylien.com/api/v1/extract?url=' + this.state.articleUrl;
+    this.fetchArticle();
     this.refreshParams();
     this.fetchData(); 
     this.setState({myState: STATE.ARTICLE});
@@ -170,6 +194,8 @@ var InputField = React.createClass({
 
   onPressUrl: function(url){
     this.setState({sampleUrl: url});
+    requestArticleUrl = 'https://api.aylien.com/api/v1/extract?url=' + this.state.sampleUrl;
+    this.fetchArticle();
     params = '?url=' + this.state.sampleUrl + '&sentences=' + SENTENCES;
     requestUrl = API_URL + params;
     this.fetchData();
@@ -241,7 +267,7 @@ const styles = StyleSheet.create({
     color: '#00FF00',
   },
   hyperlink: {
-    color: '#FF6600',
+    color: '#FFFFFF',
     // Only available for ios, darn
     textDecorationLine: 'underline',
     paddingTop: 20,
@@ -251,6 +277,11 @@ const styles = StyleSheet.create({
   },
   inputField: {
      paddingTop: 20
+  },
+  info: {
+    fontSize: 15,
+    margin: 10,
+    color: '#00FF00',
   },
   prompt: {
     fontSize: 20,
@@ -263,7 +294,7 @@ const styles = StyleSheet.create({
   },
   readingText: {
     textAlign: 'left',
-    color: '#FF6600',
+    color: '#FFFFFF',
   },
   or: {
     textAlign: 'center',
@@ -281,7 +312,7 @@ const styles = StyleSheet.create({
     height: 40, 
     borderColor: 'gray', 
     borderWidth: 10,
-    color: '#FF6600',
+    color: '#FFFFFF',
   }
 });
 
