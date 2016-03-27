@@ -41,8 +41,8 @@ ios/
 .python-version
 .watchmanconfig
 failedAttempt.js
-package.json
 
 # android files
 android/*
 !android/app
+android/app/my-release-key.keystore

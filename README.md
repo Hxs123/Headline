@@ -17,7 +17,7 @@ You need to install react-native and watchman
 
 **If you are running Linux, watchman can be annoying. You'll need to increase the number of inotify watches!!**
 
-> echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+	echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 ## Running the App
 
@@ -25,16 +25,16 @@ Make sure to have all Android [prerequisites](https://github.com/facebook/react-
 
 Make sure to run this before runnning the app
 
-> git clone https://github.com/Hxs123/Headline.git
-> cd Headline
-> npm install
+	git clone https://github.com/Hxs123/Headline.git
+	cd Headline
+	npm install
 
 To run on a virtual device, start the device
-> android avd	
+	android avd	
 and then type,
-> cd (wherever you saved this repo i.e. react-native/Headline)
-> react-native start
-> react-native run-android
+	cd (wherever you saved this repo i.e. react-native/Headline)
+	react-native start
+	react-native run-android
 
 See [Running on Device](https://facebook.github.io/react-native/docs/running-on-device-android.html) for physical android devices.
 
